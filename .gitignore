@@ -1,0 +1,4 @@
+*.tfstate
+.terraform
+local.env
+test.txt
