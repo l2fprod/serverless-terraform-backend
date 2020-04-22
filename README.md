@@ -36,14 +36,14 @@ This project provides an implementation of the REST backend using serverless [IB
 
    ```sh
    cd actions
-   ./deploy --install
+   ./deploy.sh --install
    ```
 
 1. Expose the action with API Gateway
 
    ```sh
    cd actions
-   ./deploy --installApi
+   ./deploy.sh --installApi
    ```
 
 1. Make note of the API Gateway endpoint. It looks like https://service.us.apiconnect.ibmcloud.com/gws/apigateway/api/abcdefabecdef0192837465/terraform/1/backend

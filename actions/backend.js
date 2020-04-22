@@ -44,6 +44,7 @@ function extractBodyFromParams(params) {
  */
 class Storage {
   constructor(endpoint, apiKeyId, serviceInstanceId, bucket) {
+    console.log('Initializing COS.S3', endpoint, serviceInstanceId, bucket);
     this.cos = new COS.S3({
       endpoint,
       apiKeyId,
@@ -168,7 +169,7 @@ async function main(params) {
     return returnFailure(401, { error: 'missing authentication' });
   }
 
-  const authElements = new Buffer(params.__ow_headers.authorization.split(' ')[1], 'base64').toString().split(':');
+  const authElements = Buffer.from(params.__ow_headers.authorization.split(' ')[1], 'base64').toString().split(':');
   if (authElements[0] !== 'cos') {
     return returnFailure(401, { error: 'invalid username' });    
   }

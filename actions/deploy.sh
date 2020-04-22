@@ -8,38 +8,38 @@ function usage() {
 }
 
 function createCOS() {
-  bx service create cloud-object-storage Lite serverless-terraform-storage
-  bx service key-create serverless-terraform-storage for-cli
-  bx service key-show serverless-terraform-storage for-cli
+  ibmcloud service create cloud-object-storage Lite serverless-terraform-storage
+  ibmcloud service key-create serverless-terraform-storage for-cli
+  ibmcloud service key-show serverless-terraform-storage for-cli
 }
 
 function install() {
   echo "Creating $PACKAGE_NAME package"
-  bx wsk package create $PACKAGE_NAME \
+  ibmcloud fn package create $PACKAGE_NAME \
     -p services.storage.apiEndpoint "$STORAGE_API_ENDPOINT"\
     -p services.storage.instanceId "$STORAGE_RESOURCE_INSTANCE_ID"\
     -p services.storage.bucket "$STORAGE_BUCKET_STATES"
 
   echo "Creating actions"
-  bx wsk action create $PACKAGE_NAME/backend\
+  ibmcloud fn action create $PACKAGE_NAME/backend\
     backend.js \
-    --web raw --annotation final true --kind nodejs:8
+    --web raw --annotation final true --kind nodejs:10
 }
 
 function uninstall() {
   echo "Removing actions..."
-  bx wsk action delete $PACKAGE_NAME/backend
+  ibmcloud fn action delete $PACKAGE_NAME/backend
 
   echo "Removing package..."
-  bx wsk package delete $PACKAGE_NAME
+  ibmcloud fn package delete $PACKAGE_NAME
 
   echo "Done"
-  bx wsk list
+  ibmcloud fn list
 }
 
 function update() {
   echo "Updating actions..."
-  bx wsk action update $PACKAGE_NAME/backend    backend.js  --kind nodejs:8
+  ibmcloud fn action update $PACKAGE_NAME/backend    backend.js  --kind nodejs:8
 }
 
 function showenv() {
@@ -47,14 +47,14 @@ function showenv() {
 }
 
 function installApi() {
-  bx wsk api create /terraform/1 /backend GET    $PACKAGE_NAME/backend --response-type http
-  bx wsk api create /terraform/1 /backend POST   $PACKAGE_NAME/backend --response-type http
-  bx wsk api create /terraform/1 /backend PUT    $PACKAGE_NAME/backend --response-type http
-  bx wsk api create /terraform/1 /backend DELETE $PACKAGE_NAME/backend --response-type http
+  ibmcloud fn api create /terraform/1 /backend GET    $PACKAGE_NAME/backend --response-type http
+  ibmcloud fn api create /terraform/1 /backend POST   $PACKAGE_NAME/backend --response-type http
+  ibmcloud fn api create /terraform/1 /backend PUT    $PACKAGE_NAME/backend --response-type http
+  ibmcloud fn api create /terraform/1 /backend DELETE $PACKAGE_NAME/backend --response-type http
 }
 
 function uninstallApi() {
-  bx wsk api delete /terraform/1
+  bx fn api delete /terraform/1
 }
 
 function recycle() {
