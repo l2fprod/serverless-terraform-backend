@@ -111,14 +111,14 @@ As a side note to this project, there is also the option to use Cloud Object Sto
 
    ```sh
    terraform {
+     required_version = ">= 0.13.2"
+
      backend "s3" {
        bucket                      = "terraforming"
        key                         = "global.tfstate"
        region                      = "us-geo"
        skip_region_validation      = true
        skip_credentials_validation = true
-       skip_get_ec2_platforms      = true
-       skip_requesting_account_id  = true
        skip_metadata_api_check     = true
        endpoint                    = "s3-api.us-geo.objectstorage.softlayer.net"
        access_key                  = "<from-credentials>"

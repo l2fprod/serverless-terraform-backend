@@ -39,6 +39,16 @@ function extractBodyFromParams(params) {
   return JSON.parse(Buffer.from(params.__ow_body, 'base64').toString('utf-8'));
 }
 
+function returnFailure(statusCode, errorBody) {
+  return {
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    statusCode,
+    body: Buffer.from(JSON.stringify(errorBody, null, 2)).toString('base64'),
+  };
+}
+
 /**
  * Primitives to work with Cloud Object Storage
  */
@@ -117,15 +127,16 @@ class State {
     const lockFilename = makeLockFilename(this.env);
     const currentLock = await this.storage.load(lockFilename);
     if (currentLock) {
-      console.log(`State is locked by ID=${currentLock.ID}`)
+      console.log('State is already locked', currentLock);
       const err = new Error();
       err.code = 409;
       err.body = currentLock;
       throw err;
+    } else {
+      // lock the state
+      console.log('Locking state...', lockInfo);
+      await this.storage.save(lockFilename, lockInfo);
     }
-
-    // lock the state
-    await this.storage.save(lockFilename, lockInfo);
   }
 
   unlock() {
@@ -133,18 +144,11 @@ class State {
   }
 
   get() {
-    return this.storage.load(makeFilename(this.env));
+    const stateFilename = makeFilename(this.env);
+    return this.storage.load(stateFilename);
   }
 
   async post(newState, requesterId) {
-    if (this.versioning) {
-      const currentState = await this.get();
-      if (currentState) {
-        // save a copy
-        await this.storage.save(makeVersionFilename(this.env, currentState.serial), currentState);
-      }
-    }
-
     const lockFilename = makeLockFilename(this.env);
     const currentLock = await this.storage.load(lockFilename);
     if (currentLock) {
@@ -158,11 +162,25 @@ class State {
       }
     }
 
-    await this.storage.save(makeFilename(this.env), newState);
+    if (this.versioning) {
+      const currentState = await this.get();
+      if (currentState) {
+        // save a copy
+        const versionFilename = makeVersionFilename(this.env, currentState.serial);
+        await this.storage.save(versionFilename, currentState);
+      }
+    }
+
+    const stateFilename = makeFilename(this.env);
+    await this.storage.save(stateFilename, newState);
   }
 }
 
 async function main(params) {
+  const queryParams =  params.__ow_query ? querystring.parse(params.__ow_query) : {};
+  if (queryParams.debug) {
+    console.log(params);
+  }
 
   // extract the API key from the authorization header username=cos password=apikey
   if (!params.__ow_headers.authorization) {
@@ -181,7 +199,6 @@ async function main(params) {
     params['services.storage.bucket']
   );
 
-  const queryParams =  params.__ow_query ? querystring.parse(params.__ow_query) : {};
   const state = new State(storage, queryParams.env, queryParams.versioning);
 
   try {

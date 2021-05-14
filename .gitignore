@@ -1,4 +1,8 @@
-*.tfstate
+*.tfstate*
+*.tfvars
 .terraform
+.terraform.lock.hcl
 local.env
 test.txt
+hello.txt
+backend.env
