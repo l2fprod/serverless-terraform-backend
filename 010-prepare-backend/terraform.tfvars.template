@@ -1,0 +1,8 @@
+# IBM Cloud API key
+ibmcloud_api_key=""
+
+# Prefix for the resources to be created
+basename="serverless-terraform-backend"
+
+# Region where to create resources
+region="us-south"

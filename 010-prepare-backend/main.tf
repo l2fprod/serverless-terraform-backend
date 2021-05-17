@@ -145,7 +145,7 @@ resource "local_file" "backend-config" {
 # env: name for the terraform state, e.g mystate, us/south/staging (.tfstate will be added automatically)
 # versioning: set to true to keep multiple copies of the states in the storage
 export TF_HTTP_ADDRESS="${ibm_function_action.backend.target_endpoint_url}?env=dev&versioning=true"
-export TF_HTTP_PASSWORD=${ibm_resource_key.cos_key.credentials.apikey}
+export TF_HTTP_PASSWORD="${ibm_resource_key.cos_key.credentials.apikey}"
 
 # comment the following variables to disable locking
 export TF_HTTP_LOCK_ADDRESS=$TF_HTTP_ADDRESS
